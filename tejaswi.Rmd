@@ -1,0 +1,75 @@
+---
+title: "Assignment28"
+author: "Emmadishetti Tejaswi(MA20M010)"
+date: "04/12/2020"
+output: html_document
+---
+
+```{r}
+setwd("C:/Users/EMMADISHETTI TEJASWI/Desktop/applied stats/assignment/28")
+df <- read.csv("Data.csv",header=TRUE)
+dim(df)
+str(df)
+```
+# 1)We will try to transform only price variable(dependent variable) and train multiple linear regression on training data and test it using mse
+```{r}
+summary(df$Price.in.Rupees)
+df$Price.in.Rupees =log(df$Price.in.Rupees)
+summary(df$Price.in.Rupees)
+```
+# Train-Test Split
+```{r}
+library(caTools)
+set.seed(0)
+split = sample.split(df,SplitRatio = 0.8)
+training_set = subset(df,split == TRUE)
+test_set = subset(df,split == FALSE)
+```
+# Training and Testing model
+```{r}
+lm_a = lm(Price.in.Rupees ~.,data=training_set)
+train_a = predict(lm_a,training_set)
+test_a = predict(lm_a,test_set)
+mse=mean((test_set$Price.in.Rupees-test_a)^2)
+mse
+answer=(1-mse)
+answer
+```
+# 2)Here we transform price variable again like before but instead,We will try to scale whole data and train Multiple linear Regression model again on newdataset and test it using mse
+```{r}
+df$Price.in.Rupees =exp(df$Price.in.Rupees)
+summary(df$Price.in.Rupees)
+df[,]=scale(df[,])
+split = sample.split(df,SplitRatio = 0.8)
+training_s = subset(df,split == TRUE)
+test_s = subset(df,split == FALSE)
+lm_a = lm(Price.in.Rupees ~.,data=training_s)
+train_a= predict(lm_a,training_s)
+test_a = predict(lm_a,test_s)
+```
+## Testing above Regression Model
+```{r}
+mse1=(mean((training_s$Price.in.Rupees-train_a)^2))
+mse1
+answer1=1-mse1
+answer1
+#it is performing good on unseen data also
+mse2=mean((test_s$Price.in.Rupees-test_a)^2)
+mse2 
+answer2=1-mse2
+answer2
+```
+# 3) Now we train SVM model on training set of new dataset using Linear Kernel and test it
+```{r}
+library('e1071')
+svmfitR=svm(Price.in.Rupees ~.,data=training_s,kernel="linear",gamma=1,cost=0.01,scale=TRUE)
+ypred=predict(svmfitR,test_s)
+```
+# Testing Svm model
+```{r}
+mse3=mean((ypred-test_s$Price.in.Rupees)^2)
+mse3
+answer3=1-mse3
+answer3
+```
+# Hence by testing 3 cases using mean squared error,we can conclude that model is performing well on scaled data
